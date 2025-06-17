@@ -299,7 +299,7 @@ gcll() {
 	else
 		unset 'arr[${#arr[0]}-1]'
 	fi
-	echo "$projurl" "$projname"
+	# echo "$projurl" "$projname"
 	# echo clone $arr "$projurl" "$projname"
 	git clone $arr "$projurl" "$projname"
 	cd "$projname"
@@ -354,6 +354,8 @@ alias iwlookup='grep -rnw --exclude-dir=node_modules --exclude-dir=.git --exclud
 alias iwclookup='grep -rnw --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.build --exclude-dir=.next --exclude=package*.json --exclude=*.pdf --color=auto -iocE'
 alias pdflookup='pdfgrep -Rn'
 alias ipdflookup='pdfgrep -Rni'
+alias izlookup='sh -c '\''find "${2:-.}" -iname "*.gz" -exec zgrep -ai "$1" "{}" \;'\'' _'
+
 # alias cpdflookup='sh -c '\''pdfgrep -Rc "$1" $2 $3 | egrep -v ":0$" | sed -e :a -e "s/\:\d\{1,3\}\$/0&/;ta"'\'' _'
 # cpdflookup() {
 # 	local spath="${1:-.}"
