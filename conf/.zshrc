@@ -306,6 +306,8 @@ gcll() {
 }
 alias ga='git add'
 alias gd='git diff'
+alias gb='git branch'
+alias gbmv='git branch -m'
 alias gdiff='git diff'
 alias glog='git log'
 alias pull='git pull'
@@ -328,11 +330,40 @@ alias dbtag='docker build . -t'
 alias dcls='docker container ls'
 alias dc='docker compose'
 alias dcup='docker compose up'
-alias dls='docker ps'
-alias dlss='docker ps --size'
+alias dls='docker images'
+alias dlss='docker images'
 alias dps='docker ps'
 alias dpss='docker ps --size'
-alias drun='docker run -t'
+alias drun='docker run -it --rm'
+docker_ps_inspect() {
+	echo -e "\e[4mID;IMAGE;IP;GATEWAY;PORTS;DIRECTORY; \e[0m"
+
+	for cid in $(docker ps -q); do
+		# echo "$cid"
+		inspect="$(docker inspect $cid | jq -sr .[0][0])"
+		# echo "$inspect" | jq -r ''
+		label="$(echo "$inspect" | jq -r '.Config.Image')"
+		dir="$(echo "$inspect" | jq -r '.Config.Labels."com.docker.compose.project.working_dir"' | sed "s#$HOME#~#")"
+		ip="$(echo "$inspect" | jq -r '.NetworkSettings.Networks[].IPAddress')"
+		gw="$(echo "$inspect" | jq -r '.NetworkSettings.Networks[].Gateway')"
+		ports="$(echo "$inspect" | jq -r '.NetworkSettings.Ports | to_entries[] as $p
+  | ($p.value | any(.HostIp == "0.0.0.0")) as $has4
+  | $p.value[]
+  | select(if $has4 then .HostIp == "0.0.0.0" else true end)
+  | "\($p.key) → \(.HostIp):\(.HostPort)"
+')"
+		first_port="$(echo "$ports" | head -n 1)"
+		echo "$cid;$label;$ip;$gw;$first_port;$dir"
+		echo "$ports" \
+			| tail -n +2 \
+			| while IFS= read -r line; do
+					echo ";;;;$line"
+			done
+	done
+}
+alias dps:='docker_ps_inspect'
+alias dpsn='docker_ps_inspect | column -ts \;'
+# alias dpsp='docker_ps_inspect | column -ts :'
 
 # Misc
 ## Modified default
@@ -355,6 +386,7 @@ alias iwclookup='grep -rnw --exclude-dir=node_modules --exclude-dir=.git --exclu
 alias pdflookup='pdfgrep -Rn'
 alias ipdflookup='pdfgrep -Rni'
 alias izlookup='sh -c '\''find "${2:-.}" -iname "*.gz" -exec zgrep -ai "$1" "{}" \;'\'' _'
+alias lgrep='grep -n'
 
 # alias cpdflookup='sh -c '\''pdfgrep -Rc "$1" $2 $3 | egrep -v ":0$" | sed -e :a -e "s/\:\d\{1,3\}\$/0&/;ta"'\'' _'
 # cpdflookup() {
@@ -377,15 +409,23 @@ alias clr='clear'
 alias cah='highlight'
 alias resize='convert -resize'
 alias logan='sh -c '\''cat "${1:-.}" | cut "-d " -f1,4,7 | egrep -v "/socket.io|/check|/me|/sign-in|/sign-up|/.well-known|/favicon|/robots.txt|/apple-app-site-association|/$" | sort | uniq -w 13 | sed -Erz "s/ \[([0-9]+)\/([a-zA-Z]+)\/([0-9]+):([0-9]+):([0-9]+):([0-9]+)/\t\1 \2 \3 \4:\5/g"'\'' _'
+alias ngui='grep -viE "vim|wget|curl|apt|dnf|yum|dpkg|rpm|sudo|nano|less|tar|zip|bzip2|gzip|git|zsh|z(cat|grep|diff)|php|perl|python|node|gcc|g++|clang|go|ruby|rust|docker"'
+alias ogui='grep -iE "firefox|chrome|chromium|spotify|whatsapp|telegram|discord|messenger|android|ios|safari|edge|google-(maps?|sheets|translate|cloudstorage)"'
+alias nlib='grep -v lib'
 alias original='alias | grep'
 
 ## Managing
+alias apti='sudo apt install'
+alias aptu='sudo apt update'
+alias aptug='sudo apt upgrade'
+alias aptdg='sudo apt dist-upgrade'
 alias emulator-wipe-data='sh -c '\''emulator -avd "$1" -wipe-data'\'' _'
-alias adbpush='sh -c '\''adb push $1 ${2:-/sdcard/Pictures/}'\'' _'
+alias adb-push='sh -c '\''adb push $1 ${2:-/sdcard/Downloads/}'\'' _'
 alias layout='setxkbmap -print | grep keycodes | sed -E "s/.+\((.+)\).+/\1/mg"'
 alias schown='sudo chown -R $USER:$USER'
 alias pipxir='pipx runpip cookiecutter install -r'
 cdd() { mkdir -p "$1" && cd "$1"; }
+alias colsum='paste -sd+ | bc'
 
 ## Hash
 alias blake2b512sum='openssl dgst -blake2b512'
@@ -816,7 +856,7 @@ help-recovery() {
   lsblk         Drive listing
   man           READ THE FUCKING MANUAL
   mkfs          Format partition
-  search Search in manual (first page) and packages
+  search        Search in manual (first page) and packages
   help [<text>] Show this help,
                 Or search in manual (first page) if an argument is given
 
@@ -918,7 +958,8 @@ repair() {
 }
 
 export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:/snap/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$HOME/.maestro/bin
+export PATH=$HOME/.venvs/MyEnv/bin/:$PATH:/snap/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$HOME/.maestro/bin
+
 if type go &> /dev/null; then
 	export PATH=$PATH:$(go env GOPATH)/bin
 fi
@@ -930,3 +971,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 export ENHANCED_PATH='/home/night/Documents/project/EnhancedTerminal'
+
+source /home/night/Documents/project/cve-checker/src/autocompletion.sh
+
+. "$HOME/.cargo/env"
