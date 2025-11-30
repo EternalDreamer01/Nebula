@@ -161,7 +161,10 @@ update-zsh
 | `dcdefault` | `docker compose -f compose.yml up` |
 | `dcdev` | `docker compose -f compose.development.yml up` |
 | `dctest` | `docker compose -f compose.test.yml up` |
+| `dls` | `docker images` |
 | `dps[s]` *or* `dls` | `docker ps`, + size if `s` appended |
+| `dps:` | docker processes list with network information separated by semicolon `;` |
+| `dpsn` | docker processes list with network information |
 | `drun` | `docker run -t` |
 
 ### Modified
