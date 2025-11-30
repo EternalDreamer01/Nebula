@@ -387,6 +387,8 @@ alias pdflookup='pdfgrep -Rn'
 alias ipdflookup='pdfgrep -Rni'
 alias izlookup='sh -c '\''find "${2:-.}" -iname "*.gz" -exec zgrep -ai "$1" "{}" \;'\'' _'
 alias lgrep='grep -n'
+alias jqpv='sh -c '\''jq -c "path(.. | select(. == \"$1\"))" $2'\'' _'
+alias jqpk='sh -c '\''jq -c "paths | select(.[-1] == \"$1\")" $2'\'' _'
 
 # alias cpdflookup='sh -c '\''pdfgrep -Rc "$1" $2 $3 | egrep -v ":0$" | sed -e :a -e "s/\:\d\{1,3\}\$/0&/;ta"'\'' _'
 # cpdflookup() {

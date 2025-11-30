@@ -179,6 +179,8 @@ update-zsh
 | Command | Description |
 |---|---|
 | `iagrep <args...>` | Insensitive AND grep |
+| `jqpk` | Find all paths to some key in a JSON |
+| `jqpv` | Find all paths to some value in a JSON |
 | `ll` / `la` | `ls -l` / `ls -lA` |
 | `lb` | List programs |
 | `lc` | Last exit code |
