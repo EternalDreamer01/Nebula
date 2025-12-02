@@ -422,10 +422,26 @@ alias aptu='sudo apt update'
 alias aptug='sudo apt upgrade'
 alias aptdg='sudo apt dist-upgrade'
 alias emulator-wipe-data='sh -c '\''emulator -avd "$1" -wipe-data'\'' _'
-alias adb-push='sh -c '\''adb push $1 ${2:-/sdcard/Downloads/}'\'' _'
+export ANDROID_PATH_RW=/sdcard/Download
+export ANDROID_PATH_RWX=/data/local
+alias adb-push='sh -c '\''adb push $1 ${2:-$ANDROID_PATH_RW}'\'' _'
+alias adbp='adb-push'
+alias adb-pull='adb pull'
+alias adb-path='adb shell echo \$PATH'
+adbs() {
+	adb shell ' \
+		printf "%s\n" "#!/system/bin/sh" "ls -la \"\$@\"" > /data/local/tmp/ll \
+		&& chmod 755 /data/local/tmp/ll \
+		&& export PATH=$PATH:/data/local/tmp/ \
+		&& export PATH_RW=/sdcard/Download \
+		&& export PATH_RWX=/data/local \
+		&& cd "'${1:-$ANDROID_PATH_RW}'" \
+		&& exec sh -i'
+}
+alias adbsx='adbs $ANDROID_PATH_RWX'
 alias layout='setxkbmap -print | grep keycodes | sed -E "s/.+\((.+)\).+/\1/mg"'
 alias schown='sudo chown -R $USER:$USER'
-alias pipxir='pipx runpip cookiecutter install -r'
+# alias pipxir='pipx runpip cookiecutter install -r'
 cdd() { mkdir -p "$1" && cd "$1"; }
 alias colsum='paste -sd+ | bc'
 
@@ -960,6 +976,7 @@ repair() {
 }
 
 export ANDROID_HOME=$HOME/Android/Sdk
+export NDK_PATH=$HOME/Android/Sdk/ndk/29.0.14206865/
 export PATH=$HOME/.venvs/MyEnv/bin/:$PATH:/snap/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$HOME/.maestro/bin
 
 if type go &> /dev/null; then
